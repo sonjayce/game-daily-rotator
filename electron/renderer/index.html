@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self'; style-src 'self'; script-src 'self'; img-src 'self' data:" />
+  <title>游戏轮换控制台</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- 顶栏 -->
+  <header class="fd-top">
+    <div class="fd-name">
+      <b>游戏轮换控制台</b>
+      <span>每日 03:30 自动执行</span>
+    </div>
+    <div class="fd-state">
+      <span class="fd-lamp" id="emu-dot" aria-hidden="true"></span>
+      <span id="emu-label">模拟器: 检测中</span>
+      <button id="btn-emu-start" aria-label="启动模拟器" data-tooltip="启动模拟器"><i data-lucide="monitor" aria-hidden="true"></i></button>
+      <button id="btn-emu-stop" aria-label="关闭模拟器" data-tooltip="关闭模拟器"><i data-lucide="power" aria-hidden="true"></i></button>
+      <button id="btn-logs" aria-label="打开日志目录" data-tooltip="打开日志目录"><i data-lucide="folder-open" aria-hidden="true"></i></button>
+    </div>
+  </header>
+
+  <main class="fd-main">
+    <!-- 任务时钟 -->
+    <section class="fd-clock" aria-label="当前任务状态">
+      <div class="fd-block">
+        <div class="fd-label">
+          <span class="fd-live" aria-hidden="true"></span>
+          <span id="phase">空闲</span>
+        </div>
+        <div class="fd-big"><span id="clock-num" aria-hidden="true">00:00:00</span><small id="fd-attempt"></small></div>
+        <div class="fd-what" id="fd-what">到点自动开始，或手动开始一轮</div>
+        <div class="fd-track" id="progress-track" aria-hidden="true"><div class="fd-fill" id="progress"></div></div>
+      </div>
+      <div class="fd-side">
+        <span>今日轮换</span>
+        <span class="v" id="prog-text">--</span>
+        <span>本轮开始</span>
+        <span class="v" id="started">--</span>
+        <span>下次定时</span>
+        <span class="v" id="sched-next">--</span>
+      </div>
+    </section>
+
+    <!-- 轮换队列 -->
+    <section class="fd-queue" role="list" aria-label="轮换队列" id="queue"></section>
+
+    <!-- 操作条 -->
+    <section class="fd-actions">
+      <button class="fd-btn ink" id="btn-start"><i data-lucide="play" aria-hidden="true"></i>开始轮换</button>
+      <button class="fd-btn stop" id="btn-stop" disabled><i data-lucide="square" aria-hidden="true"></i>停止</button>
+      <span class="fd-spring"></span>
+      <button class="fd-btn line" id="btn-check"><i data-lucide="heart-pulse" aria-hidden="true"></i>体检修复</button>
+      <button class="fd-btn line" id="btn-detect"><i data-lucide="package-search" aria-hidden="true"></i>包名识别</button>
+      <button class="fd-btn line" id="btn-add-game"><i data-lucide="plus" aria-hidden="true"></i>添加游戏</button>
+      <button class="fd-btn line" id="btn-logs-actions"><i data-lucide="folder-open" aria-hidden="true"></i>日志</button>
+      <button class="fd-btn line" id="btn-history"><i data-lucide="history" aria-hidden="true"></i>历史</button>
+    </section>
+
+    <!-- 自动化设置条 -->
+    <section class="fd-strip" aria-label="自动化设置">
+      <span class="fd-set">
+        <i data-lucide="clock" aria-hidden="true"></i>
+        <span class="fd-sw" id="sw-schedule" role="switch" aria-checked="false" aria-label="每日自动轮换"></span>
+        每日自动轮换
+        <input type="time" id="sched-time" value="03:30" aria-label="定时时间" />
+        <label class="fd-chk"><input type="checkbox" id="sched-autostart" /> 自启</label>
+      </span>
+      <span class="fd-div" aria-hidden="true"></span>
+      <span class="fd-set">
+        <i data-lucide="bell" aria-hidden="true"></i>
+        <span class="fd-sw" id="sw-notify" role="switch" aria-checked="false" aria-label="完成推送"></span>
+        完成推送
+        <select id="notify-channel" aria-label="推送通道">
+          <option value="serverchan">Server酱</option>
+          <option value="pushplus">PushPlus</option>
+          <option value="telegram">Telegram</option>
+        </select>
+        <input id="notify-token" class="fd-tok" placeholder="SendKey / Token" spellcheck="false" aria-label="推送 Token" />
+        <input id="notify-chat" class="fd-tok fd-tok-chat" placeholder="chat_id" spellcheck="false" aria-label="TG chat_id" />
+        <button class="fd-minibtn" id="btn-push-test">测试</button>
+      </span>
+      <span class="fd-div" aria-hidden="true"></span>
+      <span class="fd-set">
+        <i data-lucide="git-merge" aria-hidden="true"></i>
+        <span class="fd-sw" id="sw-parallel" role="switch" aria-checked="false" aria-label="终末地并行"></span>
+        终末地并行
+      </span>
+      <span class="fd-div" aria-hidden="true"></span>
+      <span class="fd-set">
+        <i data-lucide="volume-x" aria-hidden="true"></i>
+        <span class="fd-sw" id="sw-mute" role="switch" aria-checked="false" aria-label="轮换时静音"></span>
+        轮换时静音
+      </span>
+    </section>
+
+    <!-- 日志 -->
+    <section class="fd-logwrap">
+      <div class="fd-loghead">
+        <span>运行日志</span>
+        <span>引擎 + 当前游戏实时输出</span>
+        <span class="fd-spring"></span>
+        <button class="fd-minibtn" id="btn-clear">清空</button>
+      </div>
+      <div class="fd-log" id="log"></div>
+    </section>
+  </main>
+
+  <footer class="fd-foot">
+    <span id="foot">就绪</span>
+    <span>✕ 最小化到托盘 · 轮换不受影响</span>
+  </footer>
+
+  <!-- 历史记录弹窗 -->
+  <div class="modal hidden" id="hist-modal">
+    <div class="modal-card">
+      <div class="modal-head">
+        <span>历史记录 (最近 50 次)</span>
+        <button class="fd-minibtn" id="btn-hist-close">关闭</button>
+      </div>
+      <div class="hist-list" id="hist-list"></div>
+    </div>
+  </div>
+
+  <!-- 添加/编辑游戏弹窗 (傻瓜式向导) -->
+  <div class="modal hidden" id="game-modal">
+    <div class="modal-card game-card">
+      <div class="modal-head">
+        <span id="game-modal-title">添加游戏</span>
+        <button class="fd-minibtn" id="btn-game-close">关闭</button>
+      </div>
+      <div class="game-body" id="game-body"></div>
+      <div class="game-foot">
+        <span class="game-err" id="game-err"></span>
+        <span class="fd-spring"></span>
+        <button class="fd-btn line" id="btn-game-save">保存</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="vendor/lucide.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

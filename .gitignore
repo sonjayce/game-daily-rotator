@@ -1,0 +1,25 @@
+# 用户本地数据 (不入库)
+config.json
+history.jsonl
+status.json
+stop.flag
+engine.lock
+logs/
+renderer.log
+
+# 构建产物与运行时
+electron/node_modules/
+electron/dist-out/
+runtime/
+release/
+
+# Python
+__pycache__/
+*.pyc
+
+# 备份
+*.bak-*
+*.bak
+
+# 碧蓝标题页模板 (含个人截图, 自行截取)
+title_template.png

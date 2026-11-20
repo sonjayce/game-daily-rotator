@@ -1,0 +1,48 @@
+{
+  "name": "rotation-console",
+  "productName": "游戏轮换控制台",
+  "version": "1.0.0",
+  "description": "火影忍者 / 明日方舟 / 碧蓝航线 轮换日常 (Electron + Python 引擎)",
+  "main": "main.js",
+  "author": "sonjayce",
+  "license": "MIT",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder --win --dir"
+  },
+  "devDependencies": {
+    "electron": "^33.2.0",
+    "electron-builder": "^25.1.8"
+  },
+  "build": {
+    "appId": "com.sonjayce.rotation-console",
+    "productName": "游戏轮换控制台",
+    "directories": {
+      "output": "dist-out"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "renderer/**/*"
+    ],
+    "electronLanguages": [
+      "zh-CN",
+      "en-US"
+    ],
+    "win": {
+      "icon": "renderer/assets/icon.png",
+      "requestedExecutionLevel": "requireAdministrator",
+      "target": [
+        {
+          "target": "dir",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
+    }
+  },
+  "allowScripts": {
+    "electron@33.4.11": true
+  }
+}

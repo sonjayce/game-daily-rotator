@@ -1,0 +1,73 @@
+{
+  "_hint": "复制本文件为 config.json 后使用。games 里预置了一个禁用的示例条目照抄结构用；正式使用时删掉它。字段说明见 README「配置参考」。",
+  "notify": {
+    "enabled": false,
+    "channel": "serverchan",
+    "token": "",
+    "chat_id": ""
+  },
+  "schedule": {
+    "enabled": false,
+    "time": "03:30",
+    "autostart": false,
+    "last_run_date": "",
+    "justEnabled": false
+  },
+  "emulator": {
+    "mumu_manager": "C:/Program Files/Netease/MuMuPlayer-12.0/nx_main/MuMuManager.exe",
+    "mumu_player_exe": "C:/Program Files/Netease/MuMuPlayer-12.0/nx_main/MuMuNxMain.exe",
+    "adb": "C:/Program Files/Netease/MuMuPlayer-12.0/nx_main/adb.exe",
+    "adb_serial": "127.0.0.1:16384",
+    "vm_index": 0,
+    "start_timeout_sec": 180,
+    "poll_interval_sec": 5,
+    "shutdown_timeout_sec": 90
+  },
+  "rotation": {
+    "order": [],
+    "max_retries": 2,
+    "retry_wait_sec": 10,
+    "launch_game_before": true,
+    "launch_timeout_sec": 60,
+    "close_game_after": true,
+    "close_emulator_after": true,
+    "mute_emulator": true,
+    "second_pass": true,
+    "parallel": true
+  },
+  "games": {
+    "example_marker": {
+      "name": "示例：通用脚本游戏 (照抄后删掉)",
+      "enabled": false,
+      "type": "marker",
+      "exe": "C:/path/to/your/script.exe",
+      "args": "",
+      "package": "com.example.game",
+      "package_keywords": ["example"],
+      "log_file": "C:/path/to/script/logs/log-{today}.log",
+      "timeout_min": 60,
+      "success_grace_sec": 20,
+      "success_markers": ["任务已全部完成"],
+      "fail_markers": ["停止前状态：FAILED", "连接失败"],
+      "launch_game": true
+    },
+    "example_pc": {
+      "name": "示例：PC 端 MaaEnd 类 (照抄后删掉)",
+      "enabled": false,
+      "type": "mxu",
+      "exe": "C:/path/to/MaaEnd/MaaEnd.exe",
+      "dir": "C:/path/to/MaaEnd",
+      "note": "游戏自行启动, 轮换器不再拉起",
+      "launch_game": false,
+      "ui_wait_sec": 12,
+      "start_button": "开始任务",
+      "log_dir": "C:/path/to/MaaEnd/debug",
+      "success_markers": ["kind: tasks-completed"],
+      "fail_markers": ["任务启动异常"],
+      "timeout_min": 90,
+      "needs_emulator": false,
+      "recovery_mode": "light"
+    }
+  },
+  "window": {}
+}
