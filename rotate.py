@@ -1406,8 +1406,9 @@ def pre_launch_game(game, emu, rot):
 
 
 def run_mxu_game(game, emu, attempt, ts):
-    """MXU(Tauri) 类 PC 游戏: 计划任务静默启动游戏 → MaaEnd → UIA 点开始任务 → 监控日志
-    (终末地: 游戏本体 requireAdministrator, 用 HIGHEST 计划任务绕 UAC)"""
+    """MXU(Tauri) 类应用: [可选计划任务静默启动游戏] → 启动 MXU → UIA 点开始任务 → 监控日志
+    适用: 终末地(MaaEnd, PC端) / 航海王热血航线(MaaGrandLine, 模拟器端) 等 MaaXYZ MXU 形态
+    (终末地游戏本体 requireAdministrator, 用 HIGHEST 计划任务绕 UAC)"""
     gid = game['id']
     import base64
 
@@ -1433,8 +1434,17 @@ def run_mxu_game(game, emu, attempt, ts):
                               '游戏进程未出现: %s' % gp)
         time.sleep(int(game.get('game_settle_sec', 20)))
 
-    # 2 启动 MaaEnd (环境变量强制开启 WebView2 可访问性, UIA 才能点到按钮)
+    # 2 启动 MXU 应用 (环境变量强制开启 WebView2 可访问性, UIA 才能点到按钮)
     env = dict(os.environ)
+    # MuMu 目录前置到 PATH: MaaToolkit 设备枚举靠 PATH 找 MuMuManager/adb
+    # (MXU 应用连模拟器时实测必需, 与游戏自带启动脚本的 PATH 设置一致)
+    for d in [os.path.dirname(emu.manager), os.path.dirname(emu.adb)]:
+        if d and os.path.isdir(d):
+            env['PATH'] = d + os.pathsep + env.get('PATH', '')
+    # 游戏自带脚本所需的额外目录 (如 MuMu nx_device\shell)
+    for d in (game.get('path_prepend') or []):
+        if d and os.path.isdir(d):
+            env['PATH'] = d + os.pathsep + env['PATH']
     for k, v in (game.get('env') or {}).items():
         env[k] = v
     sublog = os.path.join(GAME_LOG_DIR, '%s_%s_try%d.log' % (gid, ts, attempt))
