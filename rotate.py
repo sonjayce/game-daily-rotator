@@ -1446,14 +1446,17 @@ def run_mxu_game(game, emu, attempt, ts):
     CURRENT['name'] = gid
 
     # 3 UIA 点击「开始任务」(按钮名可配, 重试等待 UI 就绪)
+    # 进程名默认从 exe 推导 (MaaEnd/MaaGrandLine 等), 也可用 process_name 覆盖
     time.sleep(int(game.get('ui_wait_sec', 12)))
     btn_name = game.get('start_button', '开始任务')
+    proc_name = game.get('process_name', '') or \
+        os.path.splitext(os.path.basename(exe))[0]
     ps = (
         '$ErrorActionPreference = "Stop"\n'
         'Add-Type -AssemblyName UIAutomationClient, UIAutomationTypes\n'
         '$btn = $null\n'
         'foreach ($i in 1..15) {\n'
-        '  $p = Get-Process -Name MaaEnd -ErrorAction SilentlyContinue | '
+        '  $p = Get-Process -Name "' + proc_name + '" -ErrorAction SilentlyContinue | '
         'Where-Object { $_.MainWindowHandle -ne 0 } | Select-Object -First 1\n'
         '  if ($p) {\n'
         '    try {\n'
@@ -1852,7 +1855,10 @@ def _cmd_run_locked(cfg):
         g = cfg['games'][gid]
         if not g.get('enabled', True):
             continue
-        if use_parallel and g.get('type') == 'mxu':
+        # 并行通道仅限"无需模拟器"的 PC 端游戏 (如终末地);
+        # 需要模拟器的 mxu 游戏 (如 MaaGrandLine) 必须留在串行通道, 避免抢设备
+        if use_parallel and g.get('type') == 'mxu' \
+                and not g.get('needs_emulator', True):
             parallel_gids.append(gid)
         else:
             serial_gids.append(gid)
@@ -2158,11 +2164,8 @@ def cmd_doctor(cfg, fix=False):
             continue
         if not g.get('enabled', True):
             continue
-        if g['type'] == 'mxu':
-            add('PASS' if not g.get('needs_emulator', True) else 'WARN',
-                '%s.package' % gid,
-                'PC 端游戏, 无需 Android 包名' if not g.get('needs_emulator', True)
-                else '未配置')
+        if g['type'] == 'mxu' and not g.get('needs_emulator', True):
+            add('PASS', '%s.package' % gid, 'PC 端游戏, 无需 Android 包名')
         elif g.get('package'):
             add('PASS', '%s.package' % gid, g['package'])
         else:
